@@ -8,7 +8,7 @@ import {IBonsaiRelay} from "bonsai/IBonsaiRelay.sol";
 import {BonsaiCheats} from "bonsai/BonsaiCheats.sol";
 
 import {BonsaiDeploy} from "./BonsaiDeploy.sol";
-import {BonsaiStarter} from "../contracts/BonsaiStarter.sol";
+// import {BonsaiStarter} from "../contracts/BonsaiStarter.sol";
 
 /// @notice Deployment script for the BonsaiStarter project.
 /// @dev Use the following environment variables to control the deployment:
@@ -27,18 +27,18 @@ import {BonsaiStarter} from "../contracts/BonsaiStarter.sol";
 ///         contract to deploy.
 ///         * If "true": The mock BonsaiTestRelay contract will be used.
 ///         * If "false" or unset: The fully verifying BonsaiRelay contract will be used.
-contract Deploy is Script, BonsaiCheats, BonsaiDeploy {
-    function run() external {
-        startBroadcast();
-        IBonsaiRelay bonsaiRelay = deployBonsaiRelay();
-        uploadImages();
+// contract Deploy is Script, BonsaiCheats, BonsaiDeploy {
+//     function run() external {
+//         startBroadcast();
+//         IBonsaiRelay bonsaiRelay = deployBonsaiRelay();
+//         uploadImages();
 
-        // TEMPLATE: Modify this block to match your expected deployment.
-        bytes32 imageId = queryImageId("FIBONACCI");
-        console2.log("Image ID for FIBONACCI is ", vm.toString(imageId));
-        BonsaiStarter app = new BonsaiStarter(bonsaiRelay, imageId);
-        console2.log("Deployed BonsaiStarter to ", address(app));
+//         // TEMPLATE: Modify this block to match your expected deployment.
+//         bytes32 imageId = queryImageId("FIBONACCI");
+//         console2.log("Image ID for FIBONACCI is ", vm.toString(imageId));
+//         BonsaiStarter app = new BonsaiStarter(bonsaiRelay, imageId);
+//         console2.log("Deployed BonsaiStarter to ", address(app));
 
-        vm.stopBroadcast();
-    }
-}
+//         vm.stopBroadcast();
+//     }
+// }

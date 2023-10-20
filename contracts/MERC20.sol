@@ -21,6 +21,8 @@ import {BonsaiCallbackReceiver} from "bonsai/BonsaiCallbackReceiver.sol";
 
 import {ERC20} from "solmate/src/tokens/ERC20.sol";
 
+import {console2} from "forge-std/console2.sol";
+
 /// @title A starter application using Bonsai through the on-chain relay.
 /// @dev This contract demonstrates one pattern for offloading the computation of an expensive
 //       or difficult to implement function to a RISC Zero guest running on Bonsai.
@@ -52,19 +54,49 @@ contract MERC20 is BonsaiCallbackReceiver, ERC20 {
         mERC20ImageId = _mERC20ImageId;
     }
 
-    function startMint(address to, uint256 amount) external onlyUnlocked(){
+    function mint(address to, uint256 amount) external onlyUnlocked(){
         // lock
         locked = true;
 
         // now ask bonsai to generate updated merkle tree
-        bonsaiRelay.requestCallback(
-            mERC20ImageId, abi.encode(to, amount), address(this), this.completeMint.selector, BONSAI_CALLBACK_GAS_LIMIT
-        );
+        _requestCallback(address(0), to, amount);
     }
 
-    function completeMint(address to, uint256 amount) external onlyBonsaiCallback(mERC20ImageId){     
-        _mint(to, amount);
+    function burn(address from, uint256 amount) external onlyUnlocked(){
+        // lock
+        locked = true;
+
+        // now ask bonsai to generate updated merkle tree
+        _requestCallback(from,address(0), amount);
+    }
+
+    function transfer(address to, uint256 amount) public override onlyUnlocked() returns (bool) {
+        // lock
+        locked = true;
+
+        // now ask bonsai to generate updated merkle tree
+        _requestCallback(msg.sender, to, amount);
+        return true;
+    }
+
+    function updateBalance(address from, address to, uint256 amount) external onlyBonsaiCallback(mERC20ImageId){     
+        if(from == address(0)){
+            _mint(to, amount);
+        }
+        if(to == address(0)){
+            _burn(from, amount);
+        }
+        if(from != address(0) && to != address(0)){
+            transferFrom(from, to, amount);
+        }
+        
         // currentRoot = newRoot;
         locked = false;
+    }
+
+    function _requestCallback(address to, address from, uint256 amount) internal {
+        bonsaiRelay.requestCallback(
+            mERC20ImageId, abi.encode(to, from, amount), address(this), this.updateBalance.selector, BONSAI_CALLBACK_GAS_LIMIT
+        );
     }
 }

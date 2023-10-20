@@ -14,20 +14,24 @@ fn main() {
     env::stdin().read_to_end(&mut input_bytes).unwrap();
     // Type array passed to `ethabi::decode_whole` should match the types encoded in
     // the application contract.
-    let input =
-        ethabi::decode_whole(&[ParamType::Address, ParamType::Uint(256)], &input_bytes).unwrap();
+    let input = ethabi::decode_whole(
+        &[ParamType::Address, ParamType::Address, ParamType::Uint(256)],
+        &input_bytes,
+    )
+    .unwrap();
 
-    let to: Address = input[0].clone().into_address().unwrap();
+    let from: Address = input[0].clone().into_address().unwrap();
+    let to: Address = input[1].clone().into_address().unwrap();
 
-    let amount: U256 = input[1].clone().into_uint().unwrap();
+    let amount: U256 = input[2].clone().into_uint().unwrap();
 
-    // Print the decoded values.
-    // println!("Decoded amount: {:?}", amount);
-    // println!("Decoded to address: {:?}", to);
-
-    // Run the computation to generate a new root.
+    // todo: Run the computation to generate a new root.
 
     // Commit the journal that will be received by the application contract.
     // Encoded types should match the args expected by the application callback.
-    env::commit_slice(&ethabi::encode(&[Token::Address(to), Token::Uint(amount)]));
+    env::commit_slice(&ethabi::encode(&[
+        Token::Address(from),
+        Token::Address(to),
+        Token::Uint(amount),
+    ]));
 }
